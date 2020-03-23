@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System.Text;
+using System;
 
 namespace Accenture.DataSaver.Processors
 {
@@ -23,8 +24,8 @@ namespace Accenture.DataSaver.Processors
         {
             var body = message.Body;
             var extactedMessage = Encoding.UTF8.GetString(body);
+            Console.WriteLine($"Received message with routing key {message.RoutingKey} exchange :{message.Exchange} & Body:{extactedMessage}");
             
-
             switch(message.RoutingKey)
             {
                 case "configuration.train":
