@@ -8,6 +8,7 @@ using Microsoft.Extensions.Hosting;
 using RabbitMQ.Client;
 using Steeltoe.CloudFoundry.Connector.RabbitMQ;
 using System;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Accenture.DataSaver
 {
@@ -26,6 +27,7 @@ namespace Accenture.DataSaver
             {
                 options.AddPolicy("AllowOrigin", builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             });
+            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             services.AddSingleton<PublishMessage>();
             services.AddSingleton<MessageExtractor>();
@@ -40,7 +42,7 @@ namespace Accenture.DataSaver
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ConnectionFactory factory)
+        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env, ConnectionFactory factory)
         {
             if (env.IsDevelopment())
             {
