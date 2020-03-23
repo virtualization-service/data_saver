@@ -14,6 +14,8 @@ namespace Accenture.DataSaver.Model
         public Body response { get; set; }
 
         public Dictionary<string, string[]> request_response_mapper { get; set; }
+
+        [JsonIgnore]
         public string service_component{get;set;}
     }
 
