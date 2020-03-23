@@ -23,7 +23,7 @@ namespace Accenture.DataSaver.Processors
         {
             var body = message.Body;
             var extactedMessage = Encoding.UTF8.GetString(body);
-            var dataObject = BsonSerializer.Deserialize<MessageDto>(extactedMessage);
+            
 
             switch(message.RoutingKey)
             {
@@ -35,6 +35,7 @@ namespace Accenture.DataSaver.Processors
                     }
                 case "parser.completed":
                     {
+                        var dataObject = BsonSerializer.Deserialize<MessageDto>(extactedMessage);
                         var messageSaved = _accessor.InsertResponse(dataObject);
                         break;
                     }
