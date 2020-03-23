@@ -12,14 +12,9 @@ namespace Accenture.DataSaver.Model
         public string operation;
         public Body request { get; set; }
         public Body response { get; set; }
+
         public Dictionary<string, string[]> request_response_mapper { get; set; }
-        public string service_component
-        {
-            get
-            {
-                return service?.AbsolutePath;
-            }
-        }
+        public string service_component{get;set;}
     }
 
     public class Body

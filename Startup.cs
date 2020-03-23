@@ -36,9 +36,7 @@ namespace Accenture.DataSaver
             services.AddRabbitMQConnection(Configuration);
 
             var connectionString = Configuration.GetValue("connectionString", string.Empty);
-
             services.AddSingleton(m => new MongoAccessor(connectionString));
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

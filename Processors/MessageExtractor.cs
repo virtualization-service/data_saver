@@ -29,8 +29,8 @@ namespace Accenture.DataSaver.Processors
             {
                 case "configuration.train":
                     {
-                        var messageSaved = _accessor.InsertResponse(dataObject);
-                        _publisher.Publish(JsonConvert.SerializeObject(dataObject),connectionFactory);
+                        //var messageSaved = _accessor.InsertResponse(dataObject);
+                        //_publisher.Publish(JsonConvert.SerializeObject(dataObject),connectionFactory);
                         break;
                     }
                 case "parser.completed":

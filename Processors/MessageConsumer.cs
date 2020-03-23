@@ -24,7 +24,7 @@ namespace Accenture.DataSaver.Processors
 
             _channel.ExchangeDeclare("configuration", type: "topic", durable: true);
             _channel.QueueDeclare("dataSaver");
-            _channel.QueueBind("dataSaver", " configuration", "*.*");
+            _channel.QueueBind("dataSaver", "configuration", "*.*");
 
 
             _channel.ConfirmSelect();
