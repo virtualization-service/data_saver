@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace Accenture.DataSaver.Controllers
 {
     [Route("api/[controller]")]
-    [EnableCors("AllowOrigin")]
+    //[EnableCors("AllowOrigin")]
     [ApiController]
     public class DataController : ControllerBase
     {

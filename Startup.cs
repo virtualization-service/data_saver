@@ -23,12 +23,13 @@ namespace Accenture.DataSaver
 
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddCors(options =>
-            {
-                options.AddPolicy("AllowOrigin", builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-            });
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
-
+            // services.AddCors(options =>
+            // {
+            //     options.AddPolicy("AllowOrigin", builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            // });
+            services.AddControllers();
+            
+            
             services.AddSingleton<PublishMessage>();
             services.AddSingleton<MessageExtractor>();
             services.AddSingleton<MessageConsumer>();
@@ -40,21 +41,29 @@ namespace Accenture.DataSaver
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, Microsoft.AspNetCore.Hosting.IHostingEnvironment env, ConnectionFactory factory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ConnectionFactory factory)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseCors();
+            //app.UseCors();
+            app.UseRouting();
 
             var processors = app.ApplicationServices.GetService<MessageConsumer>();
-            var life = app.ApplicationServices.GetService<Microsoft.AspNetCore.Hosting.IApplicationLifetime>();
+            var life = app.ApplicationServices.GetService<IHostApplicationLifetime>();
             life.ApplicationStarted.Register(GetOnStarted(factory, processors));
             life.ApplicationStopping.Register(GetOnStopped(factory, processors));
 
-            app.UseMvc();
+
+
+            //app.UseAuthorization();
+
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapControllers();
+            });
         }
 
         private static Action GetOnStarted(ConnectionFactory factory, MessageConsumer processors)
