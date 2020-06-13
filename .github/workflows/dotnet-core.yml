@@ -43,10 +43,10 @@ jobs:
          podman login quay.io -u ${{ secrets.docker_username }} -p ${{ secrets.docker_password }}
     - name: Build Image using Podman
       run: |
-         podman build . -t {{ steps.extract_branch.outputs.image_name }}
+         podman build . -t quay.io/neinnovationorg/datasaver:${{ steps.extract_branch.outputs.branch }}
     - name: Push Image to Github Registry
       run: |
-          podman push {{ steps.extract_branch.outputs.image_name }}
+          podman push quay.io/neinnovationorg/datasaver:${{ steps.extract_branch.outputs.branch }}
     - name: OpenShift Action
       uses: redhat-developer/openshift-actions@v2.0
       with:
@@ -64,12 +64,12 @@ jobs:
         cmd: |
           'version'
           'project virtualization'
-          'tag --source=docker {{ steps.extract_branch.outputs.image_name }} development/datasaver:${{ steps.extract_branch.outputs.branch }}'
+          'tag --source=docker quay.io/neinnovationorg/datasaver:${{ steps.extract_branch.outputs.branch }} development/datasaver:${{ steps.extract_branch.outputs.branch }}'
     - name: Scan Image
       uses: Azure/container-scan@v0
       continue-on-error: true
       with:
-        image-name: quay.io/neinnovationorg/parser:${{ steps.extract_branch.outputs.branch }}
+        image-name: quay.io/neinnovationorg/datasaver:${{ steps.extract_branch.outputs.branch }}
         username: ${{ secrets.docker_username }}
         password: ${{ secrets.docker_password }}
         token: ${{ github.token }}
