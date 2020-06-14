@@ -1,4 +1,5 @@
-﻿using RabbitMQ.Client;
+﻿using Microsoft.Extensions.Logging;
+using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 using System;
 
@@ -11,8 +12,11 @@ namespace Accenture.DataSaver.Processors
 
         private IModel _channel;
 
-        public MessageConsumer(MessageExtractor extractor)
+        private readonly ILogger<MessageConsumer> _logger;
+
+        public MessageConsumer(MessageExtractor extractor, ILogger<MessageConsumer> logger)
         {
+            _logger=logger;
             _extractor = extractor;
         }
 
@@ -22,9 +26,9 @@ namespace Accenture.DataSaver.Processors
 
             _channel = connection.CreateModel();
 
-            _channel.ExchangeDeclare("virtualization", type: "topic", durable: true);
-            _channel.QueueDeclare("dataSaver1");
-            _channel.QueueBind("dataSaver1", "virtualization", "*.*");
+            _channel.ExchangeDeclare("configuration", type: "topic", durable: true);
+            _channel.QueueDeclare("dataSaver");
+            _channel.QueueBind("dataSaver", "configuration", "*.*");
 
 
             _channel.ConfirmSelect();
@@ -45,7 +49,7 @@ namespace Accenture.DataSaver.Processors
             };
 
             _channel.BasicQos(0, 10000, false);
-            _channel.BasicConsume("dataSaver1", true, consumer: consumer);
+            _channel.BasicConsume("dataSaver", true, consumer: consumer);
         }
 
         public void DeRegister(ConnectionFactory factory)
