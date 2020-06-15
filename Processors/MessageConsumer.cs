@@ -27,8 +27,8 @@ namespace Accenture.DataSaver.Processors
             _channel = connection.CreateModel();
 
             _channel.ExchangeDeclare("configuration", type: "topic", durable: true);
-            _channel.QueueDeclare("dataSaver");
-            _channel.QueueBind("dataSaver", "configuration", "*.*");
+            _channel.QueueDeclare("dataSaver1");
+            _channel.QueueBind("dataSaver1", "configuration", "*.*");
 
 
             _channel.ConfirmSelect();
@@ -49,7 +49,7 @@ namespace Accenture.DataSaver.Processors
             };
 
             _channel.BasicQos(0, 10000, false);
-            _channel.BasicConsume("dataSaver", true, consumer: consumer);
+            _channel.BasicConsume("dataSaver1", true, consumer: consumer);
         }
 
         public void DeRegister(ConnectionFactory factory)
