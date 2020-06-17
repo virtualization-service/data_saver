@@ -8,7 +8,6 @@ using Microsoft.Extensions.Hosting;
 using RabbitMQ.Client;
 using Steeltoe.CloudFoundry.Connector.RabbitMQ;
 using System;
-using Microsoft.AspNetCore.Mvc;
 
 namespace Accenture.DataSaver
 {
@@ -23,13 +22,18 @@ namespace Accenture.DataSaver
 
         public void ConfigureServices(IServiceCollection services)
         {
-            // services.AddCors(options =>
-            // {
-            //     options.AddPolicy("AllowOrigin", builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-            // });
+            services.AddCors(options =>
+           {
+               options.AddDefaultPolicy(
+                               builder =>
+                               {
+                                   builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader();
+                               });
+           });
+
             services.AddControllers();
-            
-            
+
+
             services.AddSingleton<PublishMessage>();
             services.AddSingleton<MessageExtractor>();
             services.AddSingleton<MessageConsumer>();
@@ -48,17 +52,13 @@ namespace Accenture.DataSaver
                 app.UseDeveloperExceptionPage();
             }
 
-            //app.UseCors();
             app.UseRouting();
+            app.UseCors();
 
             var processors = app.ApplicationServices.GetService<MessageConsumer>();
             var life = app.ApplicationServices.GetService<IHostApplicationLifetime>();
             life.ApplicationStarted.Register(GetOnStarted(factory, processors));
             life.ApplicationStopping.Register(GetOnStopped(factory, processors));
-
-
-
-            //app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {
