@@ -125,7 +125,7 @@ namespace Accenture.DataSaver.DataAccess
 
             var result = collection.ReplaceOne(filter: new BsonDocument("operation", document["operation"].ToString()), options: new ReplaceOptions { IsUpsert = true }, replacement: document);
 
-            return "Done";
+            return new JObject(new JProperty("result","Success")).ToString();
 
         }
 
@@ -145,11 +145,10 @@ namespace Accenture.DataSaver.DataAccess
 
                 return response.ToJson();
             }
-
-
             return new JObject(new JProperty("data", new JArray())).ToString();
-
         }
+
+       
 
         public string GetAllOperations()
         {
