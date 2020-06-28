@@ -44,6 +44,14 @@ namespace Accenture.DataSaver.Controllers
             return Ok(_accessor.GetAllOperations());
         }
 
+        [HttpDelete("operation")]
+        public ActionResult<string> DeleteOperation([FromQuery] string operation, [FromServices] ConnectionFactory connection)
+        {
+            var messageSaved = _accessor.DeleteOperation(operation);
+
+            return Ok(messageSaved);
+        }
+
         [HttpGet("responses")]
         public ActionResult GetRequestFormattedData([FromQuery] string operation)
         {

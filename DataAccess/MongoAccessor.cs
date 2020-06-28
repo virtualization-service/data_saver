@@ -129,6 +129,22 @@ namespace Accenture.DataSaver.DataAccess
 
         }
 
+        public string DeleteOperation(string operation)
+        {
+            var client = new MongoClient(_connectionString);
+            var database = client.GetDatabase(DatabaseName);
+
+            database.DropCollection(operation);
+
+
+            var collection = database.GetCollection<BsonDocument>("rankers");
+
+            var result = collection.DeleteOne(filter: new BsonDocument("operation", operation));
+
+            return new JObject(new JProperty("result",$"Success in deleting { result.DeletedCount } records")).ToString();
+
+        }
+
         public string GetRanker(string operation)
         {
             var client = new MongoClient(_connectionString);
