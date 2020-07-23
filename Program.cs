@@ -19,6 +19,11 @@ namespace Accenture.DataSaver
 
         public static IWebHostBuilder CreateHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.AddConsole();
+                })
                 .ConfigureAppConfiguration((buildContext, configBuilder)=>{
                     configBuilder.AddEnvironmentVariables();
                     configBuilder.AddJsonFile("appsettings.json");

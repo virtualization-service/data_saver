@@ -13,7 +13,7 @@ using System.Threading.Tasks;
 namespace Accenture.DataSaver.Controllers
 {
     [Route("api/[controller]")]
-    [EnableCors("AllowOrigin")]
+    //[EnableCors("AllowOrigin")]
     [ApiController]
     public class DataController : ControllerBase
     {
@@ -42,6 +42,14 @@ namespace Accenture.DataSaver.Controllers
         public ActionResult GetAllOperations()
         {
             return Ok(_accessor.GetAllOperations());
+        }
+
+        [HttpDelete("operation")]
+        public ActionResult<string> DeleteOperation([FromQuery] string operation, [FromServices] ConnectionFactory connection)
+        {
+            var messageSaved = _accessor.DeleteOperation(operation);
+
+            return Ok(messageSaved);
         }
 
         [HttpGet("responses")]

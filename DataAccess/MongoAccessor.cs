@@ -125,7 +125,23 @@ namespace Accenture.DataSaver.DataAccess
 
             var result = collection.ReplaceOne(filter: new BsonDocument("operation", document["operation"].ToString()), options: new ReplaceOptions { IsUpsert = true }, replacement: document);
 
-            return "Done";
+            return new JObject(new JProperty("result","Success")).ToString();
+
+        }
+
+        public string DeleteOperation(string operation)
+        {
+            var client = new MongoClient(_connectionString);
+            var database = client.GetDatabase(DatabaseName);
+
+            database.DropCollection(operation);
+
+
+            var collection = database.GetCollection<BsonDocument>("rankers");
+
+            var result = collection.DeleteOne(filter: new BsonDocument("operation", operation));
+
+            return new JObject(new JProperty("result",$"Success in deleting { result.DeletedCount } records")).ToString();
 
         }
 
@@ -145,11 +161,10 @@ namespace Accenture.DataSaver.DataAccess
 
                 return response.ToJson();
             }
-
-
             return new JObject(new JProperty("data", new JArray())).ToString();
-
         }
+
+       
 
         public string GetAllOperations()
         {
