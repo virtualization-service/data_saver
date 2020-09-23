@@ -26,9 +26,9 @@ jobs:
       run: |
         echo ::set-output name=repo::$(echo ${GITHUB_REPOSITORY})
         echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
-        echo ::set-output name=image-name::$(echo quay.io/neinnovationorg/data-saver})
+        echo ::set-output name=image-name::$(echo quay.io/neinnovationorg/datasaver})
         echo ::set-output name=branch::${GITHUB_REF#refs/heads/}
-        echo ::set-output name=docker_repo::$(echo /neinnovationorg/data-saver) 
+        echo ::set-output name=docker_repo::$(echo /neinnovationorg/datasaver) 
         
     - name: Login to Podman
       id: login
@@ -38,10 +38,10 @@ jobs:
          podman login quay.io -u ${{ secrets.docker_username }} -p ${{ secrets.docker_password }}
     - name: Build Image using Podman
       run: |
-         podman build . -t quay.io/neinnovationorg/data-saver:${{ steps.extract_branch.outputs.branch }}
+         podman build . -t quay.io/neinnovationorg/datasaver:${{ steps.extract_branch.outputs.branch }}
     - name: Push Image to Github Registry
       run: |
-          podman push quay.io/neinnovationorg/data-saver:${{ steps.extract_branch.outputs.branch }}
+          podman push quay.io/neinnovationorg/datasaver:${{ steps.extract_branch.outputs.branch }}
     - name: OpenShift Action
       uses: redhat-developer/openshift-actions@v2.0
       with:
@@ -53,4 +53,4 @@ jobs:
         cmd: |
           'version'
           'project vavtar-services'
-          'tag --source=docker quay.io/neinnovationorg/data-saver:${{ steps.extract_branch.outputs.branch }} vavtar-services/data-saver:${{ steps.extract_branch.outputs.branch }}'    
+          'tag --source=docker quay.io/neinnovationorg/datasaver:${{ steps.extract_branch.outputs.branch }} vavtar-services/datasaver:${{ steps.extract_branch.outputs.branch }}'    
