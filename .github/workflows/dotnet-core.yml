@@ -2,7 +2,7 @@ name: .NET Core
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, dev ]
 
 jobs:
   build:
@@ -21,19 +21,14 @@ jobs:
         echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         echo "##[set-output name=sha_short;]$(echo $(git rev-parse --short HEAD))"
       id: extract_branch
-    #- name: Install dependencies
-      #run: dotnet restore
-    #- name: Build
-      #run: dotnet build --configuration Release --no-restore
     - name: Set Constants
       id: consts
       run: |
         echo ::set-output name=repo::$(echo ${GITHUB_REPOSITORY})
         echo ::set-output name=sha_short::$(git rev-parse --short HEAD)
-        echo ::set-output name=image-name::$(echo quay.io/neinnovationorg/datasaver})
+        echo ::set-output name=image-name::$(echo quay.io/neinnovationorg/data-saver})
         echo ::set-output name=branch::${GITHUB_REF#refs/heads/}
-        echo ::set-output name=docker_repo::$(echo /neinnovationorg/datasaver) 
-        echo ::set-output name=image_name::quay.io/neinnovationorg/datasaver:${GITHUB_REF#refs/heads/}
+        echo ::set-output name=docker_repo::$(echo /neinnovationorg/data-saver) 
         
     - name: Login to Podman
       id: login
@@ -43,10 +38,10 @@ jobs:
          podman login quay.io -u ${{ secrets.docker_username }} -p ${{ secrets.docker_password }}
     - name: Build Image using Podman
       run: |
-         podman build . -t quay.io/neinnovationorg/datasaver:${{ steps.extract_branch.outputs.branch }}
+         podman build . -t quay.io/neinnovationorg/data-saver:${{ steps.extract_branch.outputs.branch }}
     - name: Push Image to Github Registry
       run: |
-          podman push quay.io/neinnovationorg/datasaver:${{ steps.extract_branch.outputs.branch }}
+          podman push quay.io/neinnovationorg/data-saver:${{ steps.extract_branch.outputs.branch }}
     - name: OpenShift Action
       uses: redhat-developer/openshift-actions@v2.0
       with:
@@ -54,25 +49,8 @@ jobs:
         openshift_server_url: ${{ secrets.OPENSHIFT_SERVER_URL }}
         # JSON with values to connect to the Openshift cluster
         parameters: '{"username": "${{ secrets.OPENSHIFT_USER }}", "acceptUntrustedCerts": "true", "password":"${{ secrets.OPENSHIFT_PASSWORD }}"}'
-        # Oc command to be executed
-          #'version'
-          #'project development'
-          #'delete all --selector app=parser'
-          #'tag --source=docker quay.io/neinnovationorg/parser:${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.sha_short }} development/parser:${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.sha_short }}'
-          #'new-app quay.io/neinnovationorg/parser:${{ steps.extract_branch.outputs.branch }}-${{ steps.extract_branch.outputs.sha_short }}'
-          #'expose services/parser':  
+        # Oc command to be executed 
         cmd: |
           'version'
-          'project virtualization'
-          'tag --source=docker quay.io/neinnovationorg/datasaver:${{ steps.extract_branch.outputs.branch }} virtualization/datasaver:${{ steps.extract_branch.outputs.branch }}'
-    - name: Scan Image
-      uses: Azure/container-scan@v0
-      continue-on-error: true
-      with:
-        image-name: quay.io/neinnovationorg/datasaver:${{ steps.extract_branch.outputs.branch }}
-        username: ${{ secrets.docker_username }}
-        password: ${{ secrets.docker_password }}
-        token: ${{ github.token }}
-        severity-threshold: HIGH
-        run-quality-checks: false
-      
+          'project vavtar-services'
+          'tag --source=docker quay.io/neinnovationorg/data-saver:${{ steps.extract_branch.outputs.branch }} vavtar-services/data-saver:${{ steps.extract_branch.outputs.branch }}'    
