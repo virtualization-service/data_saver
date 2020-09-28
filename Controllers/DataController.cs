@@ -3,7 +3,9 @@ using Accenture.DataSaver.Model;
 using Accenture.DataSaver.Processors;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Mvc;
+using MongoDB.Bson.Serialization;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using RabbitMQ.Client;
 using System;
 using System.Collections.Generic;
@@ -78,6 +80,16 @@ namespace Accenture.DataSaver.Controllers
             var messageSaved = _accessor.UpdateRanker(message.ToString());
 
             return Ok(messageSaved);
+        }
+
+        public ActionResult<string> SaveMessage([FromBody] Object message)
+        {
+            var json = JObject.Parse(message.ToString());
+            var dataObject = BsonSerializer.Deserialize<MessageDto>(json.ToString());
+            var test = JsonConvert.DeserializeObject<MessageDto>(message.ToString());
+            var messageSaved = _accessor.InsertResponse(test);
+
+            return Ok(json.ToString());
         }
 
     }

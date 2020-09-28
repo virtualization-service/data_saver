@@ -11,7 +11,7 @@ namespace Accenture.DataSaver.DataAccess
     public class MongoAccessor
     {
         private readonly string _connectionString;
-        private const string DatabaseName = "tms_logs_D";
+        private const string DatabaseName = "vavtar";
 
         public MongoAccessor(string connectionString)
         {

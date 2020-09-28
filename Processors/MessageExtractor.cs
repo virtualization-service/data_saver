@@ -41,7 +41,7 @@ namespace Accenture.DataSaver.Processors
                     }
                 case "parser.completed":
                     {
-                        var dataObject = BsonSerializer.Deserialize<MessageDto>(extactedMessage);
+                        var dataObject = JsonConvert.DeserializeObject<MessageDto>(extactedMessage);
                         var messageSaved = _accessor.InsertResponse(dataObject);
                         break;
                     }
