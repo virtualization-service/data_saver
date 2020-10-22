@@ -206,11 +206,6 @@ namespace Accenture.DataSaver.DataAccess
                 var collection = database.GetCollection<BsonDocument>(operation);
 
                 var objects = collection.FindSync(filter: new BsonDocument()).ToList();
-
-                foreach(var obj in objects)
-                {
-                    RemoveIdObject(obj);
-                }
                 
                 var jsonString = JsonConvert.SerializeObject(objects.ConvertAll(d => BsonTypeMapper.MapToDotNetValue(d)), Formatting.Indented);
 
@@ -219,6 +214,23 @@ namespace Accenture.DataSaver.DataAccess
             }
 
             return new JObject(new JProperty("request", new JObject(new JProperty("formatted_Data", new JArray())))).ToString();
+        }
+
+        public void DeleteResponse(string operation, string id)
+        {
+            var client = new MongoClient(_connectionString);
+            var database = client.GetDatabase(DatabaseName);
+
+            if(database.ListCollectionNames().ToList().Any(x => x == operation))
+            {
+                var collection = database.GetCollection<BsonDocument>(operation);
+
+                ObjectId objectId = ObjectId.Parse(id);
+                var deleteFilter = Builders<BsonDocument>.Filter.Eq("_id", objectId);
+
+                collection.DeleteOne(deleteFilter);
+            }
+
         }
 
         public void LogOperation(string correlationId, string message, string exchange = "", string routingKey = "")

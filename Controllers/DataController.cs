@@ -60,6 +60,13 @@ namespace Accenture.DataSaver.Controllers
             return Ok(_accessor.GetRequestFormattedData(operation));
         }
 
+        [HttpDelete("responses")]
+        public ActionResult GetRequestFormattedData([FromQuery] string operation, [FromQuery] string id)
+        {
+            _accessor.DeleteResponse(operation, id);
+            return Ok("Success");
+        }
+
         [HttpPost]
         public ActionResult<string> POST([FromBody] MessageDto message, [FromServices] ConnectionFactory connection)
         {
