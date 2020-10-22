@@ -210,8 +210,11 @@ namespace Accenture.DataSaver.DataAccess
                 {
                     RemoveIdObject(obj);
                 }
+                
+                var jsonString = JsonConvert.SerializeObject(objects.ConvertAll(d => BsonTypeMapper.MapToDotNetValue(d)), Formatting.Indented);
 
-                return objects.ToJson();
+                return jsonString;
+
             }
 
             return new JObject(new JProperty("request", new JObject(new JProperty("formatted_Data", new JArray())))).ToString();
