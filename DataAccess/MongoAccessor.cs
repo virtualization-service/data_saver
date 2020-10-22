@@ -32,7 +32,8 @@ namespace Accenture.DataSaver.DataAccess
             }
 
             var collection = database.GetCollection<BsonDocument>(serviceIdentifier);
-            var jdoc = (new MessageDto { response = message.response, request = new Body { formatted_data = message.request?.formatted_data } }).ToBsonDocument();
+            var jdoc = (new MessageDto { response = message.response, request = new Body { formatted_data = message.request?.formatted_data, raw_data = message.request?.raw_data } }).ToBsonDocument();
+            jdoc.Add("created_date", DateTime.Now);
             RemoveIdObject(jdoc);
 
             collection.InsertOne(jdoc);
