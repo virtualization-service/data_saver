@@ -11,6 +11,17 @@ namespace Accenture.DataSaver.Model
         public ObjectId? _id;
         public Uri service;
         public string operation;
+
+        public string protocol{ get; set;}
+
+        public string soapaction{ get; set;}
+
+        public string authenticationMethod{ get; set;}
+
+        public string authenticationKey{ get; set;}
+
+        public string authenticationValue{ get; set;}
+
         public Body request { get; set; }
         public Body response { get; set; }
 

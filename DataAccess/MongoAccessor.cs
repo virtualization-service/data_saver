@@ -24,13 +24,29 @@ namespace Accenture.DataSaver.DataAccess
             var client = new MongoClient(_connectionString);
             var database = client.GetDatabase(DatabaseName);
 
-            var collections = database.ListCollectionNames();
+            var collections = database.ListCollectionNames().ToList();
             var serviceIdentifier = message.operation;
 
-            if (!collections.ToList().Any(x => x == serviceIdentifier))
+            if (!collections.Any(x => x == serviceIdentifier))
             {
                 database.CreateCollection(serviceIdentifier);
             }
+
+            if (!collections.Any(x => x == "ServiceData"))
+            {
+                database.CreateCollection("ServiceData");
+            }
+
+            var serviceCollection = database.GetCollection<BsonDocument>("ServiceData");
+            var filter_id = Builders<BsonDocument>.Filter.Eq("operation", message.operation);
+            
+            serviceCollection.ReplaceOne(filter_id,(new Metadata{operation = message.operation,
+                    authenticationKey = message.authenticationKey,
+                    authenticationMethod = message.authenticationMethod,
+                    authenticationValue = message.authenticationValue,
+                     }).ToBsonDocument(),new ReplaceOptions { IsUpsert = true });
+
+            CreateIndexAsync("ServiceData", "operation");
 
             var collection = database.GetCollection<BsonDocument>(serviceIdentifier);
             var jdoc = (new MessageDto { response = message.response, request = new Body { formatted_data = message.request?.formatted_data, raw_data = message.request?.raw_data } }).ToBsonDocument();
@@ -122,6 +138,10 @@ namespace Accenture.DataSaver.DataAccess
             var database = client.GetDatabase(DatabaseName);
 
             var collection = database.GetCollection<BsonDocument>("rankers");
+            CreateIndexAsync("rankers", "operation");
+
+
+
             var document = BsonSerializer.Deserialize<BsonDocument>(dataObj);
             RemoveIdObject(document);
 
@@ -138,7 +158,6 @@ namespace Accenture.DataSaver.DataAccess
 
             database.DropCollection(operation);
 
-
             var collection = database.GetCollection<BsonDocument>("rankers");
 
             var result = collection.DeleteOne(filter: new BsonDocument("operation", operation));
@@ -152,18 +171,32 @@ namespace Accenture.DataSaver.DataAccess
             var client = new MongoClient(_connectionString);
             var database = client.GetDatabase(DatabaseName);
             var collection = database.GetCollection<BsonDocument>("rankers");
+            var servicecollection = database.GetCollection<BsonDocument>("ServiceData");
 
             var response = collection.Find(filter: new BsonDocument("operation", operation), options: new FindOptions() { ShowRecordId = false }).FirstOrDefault();
+
+            var serviceMetadata = servicecollection.Find(filter: new BsonDocument("operation", operation), options: new FindOptions() { ShowRecordId = false }).FirstOrDefault();
 
             if (response != null)
             {
                 BsonElement bsonElement;
                 if (response.TryGetElement("_id", out bsonElement))
                     response.RemoveElement(bsonElement);
+                
+                response.SetElement(new BsonElement("serviceData", serviceMetadata));
 
                 return response.ToJson();
             }
             return new JObject(new JProperty("data", new JArray())).ToString();
+        }
+
+        private void CreateIndexAsync(string collectionName, string indexProperty)
+        {
+            var client = new MongoClient(_connectionString);
+            var database = client.GetDatabase(DatabaseName);
+            var collection = database.GetCollection<BsonDocument>(collectionName);
+            var indexKeysDefinition = Builders<BsonDocument>.IndexKeys.Ascending(indexProperty);
+            collection.Indexes.CreateOneAsync(new CreateIndexModel<BsonDocument>(indexKeysDefinition));
         }
 
        
@@ -177,7 +210,6 @@ namespace Accenture.DataSaver.DataAccess
             var objects = collection.FindSync(filter: new BsonDocument()).ToList().Select(p => GetObject(p, "operation"));
 
             return objects.ToJson();
-
         }
 
         private static void RemoveIdObject(BsonDocument response)

@@ -30,7 +30,6 @@ namespace Accenture.DataSaver.Processors
             _channel.QueueDeclare("dataSaver");
             _channel.QueueBind("dataSaver", "configuration", "*.*");
 
-
             _channel.ConfirmSelect();
 
             _channel.BasicAcks += ChannelBasicAck;
