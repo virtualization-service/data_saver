@@ -177,6 +177,13 @@ namespace Accenture.DataSaver.DataAccess
 
             var serviceMetadata = servicecollection.Find(filter: new BsonDocument("operation", operation), options: new FindOptions() { ShowRecordId = false }).FirstOrDefault();
 
+            if(serviceMetadata != null){
+                BsonElement bsonElement;
+                if (serviceMetadata.TryGetElement("_id", out bsonElement))
+                    serviceMetadata.RemoveElement(bsonElement);
+
+            }
+
             if (response != null)
             {
                 BsonElement bsonElement;
