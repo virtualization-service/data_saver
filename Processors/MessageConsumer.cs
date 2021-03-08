@@ -22,6 +22,9 @@ namespace Accenture.DataSaver.Processors
 
         public void Register(ConnectionFactory factory)
         {
+            if(!string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("RABBIT_MQ_URI")))
+                factory.Uri = new Uri(System.Environment.GetEnvironmentVariable("RABBIT_MQ_URI"));
+
             var connection = factory.CreateConnection();
 
             _channel = connection.CreateModel();

@@ -41,6 +41,10 @@ namespace Accenture.DataSaver
             services.AddRabbitMQConnection(Configuration);
 
             var connectionString = Configuration.GetValue("connectionString", string.Empty);
+            
+            if(! string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING")))
+                connectionString = System.Environment.GetEnvironmentVariable("MONGO_CONNECTION_STRING");
+
             services.AddSingleton(m => new MongoAccessor(connectionString));
         }
 
