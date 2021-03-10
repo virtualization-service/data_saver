@@ -162,6 +162,9 @@ namespace Accenture.DataSaver.DataAccess
 
             var result = collection.DeleteOne(filter: new BsonDocument("operation", operation));
 
+            var serviceDatacollection = database.GetCollection<BsonDocument>("ServiceData");
+            collection.DeleteOne(filter: new BsonDocument("operation", operation));
+
             return new JObject(new JProperty("result",$"Success in deleting { result.DeletedCount } records")).ToString();
 
         }
