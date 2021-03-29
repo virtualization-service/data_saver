@@ -57,6 +57,9 @@ namespace Accenture.DataSaver.Processors
                     }
 
             }
+            var data = JsonConvert.DeserializeObject<MessageDto>(extactedMessage);
+            _accessor.LogOperation(data.unique_id, extactedMessage, data.service.AbsoluteUri, message.Exchange, message.RoutingKey );
+
         }
     }
 }

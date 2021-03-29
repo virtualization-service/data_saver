@@ -89,6 +89,31 @@ namespace Accenture.DataSaver.Controllers
             return Ok(messageSaved);
         }
 
+        [HttpPost("recordNew")]
+        public ActionResult<string> RecordNewOperation([FromBody] object message, [FromServices] ConnectionFactory connection)
+        {
+            return Ok(_accessor.RecordNewOperation(message.ToString()));
+        }
+
+        [HttpPost("recordExisting")]
+        public ActionResult<string> RecordExistingOperation([FromBody] object message, [FromServices] ConnectionFactory connection)
+        {
+            return Ok(_accessor.RecordExistingOperation(message.ToString()));
+        }
+
+        [HttpGet("recordOperations")]
+        public ActionResult GetAllRecordOperations()
+        {
+            return Ok(_accessor.GetAllRecordLearningOperations());
+        }
+
+        [HttpGet("activityLogs")]
+        public ActionResult GetAllLogs()
+        {
+            return Ok(_accessor.GetAllLogs());
+        }
+
+
         public ActionResult<string> SaveMessage([FromBody] Object message)
         {
             var json = JObject.Parse(message.ToString());
