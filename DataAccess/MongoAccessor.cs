@@ -297,16 +297,16 @@ namespace Accenture.DataSaver.DataAccess
 
             var collection = database.GetCollection<DataLog>("training_logs");
 
-            var findOptions = new FindOptions<DataLog>()
+            var findOptions = new FindOptions<DataLog, BsonDocument>()
             {
                 Limit = 200,
                 Sort = Builders<DataLog>.Sort.Descending(x => x.Date)
             };
 
             findOptions.Projection = "{'_id': 0, 'CorrelationId':0}";
-            var findFluent = collection.FindSync<DataLog>(FilterDefinition<DataLog>.Empty, findOptions).ToList();
+            var findFluent = collection.FindSync<BsonDocument>(FilterDefinition<DataLog>.Empty, findOptions).ToList();
+            findFluent.ForEach(x => { x["Date"] = Convert.ToDateTime(x["Date"]).ToString("MM-dd-yyyy"); });
             return findFluent.ToJson();
-
         }
 
         public string RecordNewOperation(string dataObj)
