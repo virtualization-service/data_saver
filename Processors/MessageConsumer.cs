@@ -25,7 +25,7 @@ namespace Accenture.DataSaver.Processors
             if(!string.IsNullOrEmpty(System.Environment.GetEnvironmentVariable("RABBIT_MQ_URI")))
                 factory.Uri = new Uri(System.Environment.GetEnvironmentVariable("RABBIT_MQ_URI"));
            
-            Console.Writeline("Connecting to RabbitMQ : " + factory.Uri.ToString());
+            Console.WriteLine("Connecting to RabbitMQ : " + factory.Uri.ToString());
 
             var connection = factory.CreateConnection();
 
