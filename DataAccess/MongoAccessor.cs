@@ -12,7 +12,7 @@ namespace Accenture.DataSaver.DataAccess
     public class MongoAccessor
     {
         private readonly string _connectionString;
-        private const string DatabaseName = System.Environment.GetEnvironmentVariable("MONGO_DATABASE_NAME") ?? "vavtar";
+        private string DatabaseName = System.Environment.GetEnvironmentVariable("MONGO_DATABASE_NAME") ?? "vavtar";
 
         public MongoAccessor(string connectionString)
         {
