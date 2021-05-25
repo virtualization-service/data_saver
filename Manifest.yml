@@ -7,4 +7,4 @@
   memory: 1G
   services:
   - RabbitMQ-VirtualizationTrainer
-  stack: cflinuxfs3
+  stack: cflinuxfs3 
