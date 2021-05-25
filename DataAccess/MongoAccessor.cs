@@ -275,19 +275,19 @@ namespace Accenture.DataSaver.DataAccess
 
         }
 
-        public void LogOperation(string correlationId, string message, string exchange = "", string routingKey = "")
+        public void LogOperation(string correlationId, string message, string serviceUrl, string exchange = "", string routingKey = "")
         {
             var client = new MongoClient(_connectionString);
             var database = client.GetDatabase(DatabaseName);
 
             if(!database.ListCollectionNames().ToList().Any(x => x == "training_logs"))
             {
-                database.CreateCollection("trianing_logs");
+                database.CreateCollection("training_logs");
             }
 
             var collection = database.GetCollection<DataLog>("training_logs");
 
-            collection.InsertOneAsync(new DataLog { CorrelationId = correlationId, Message = message, RoutingKey = routingKey, Exchange = exchange, Date = DateTime.Now });
+            collection.InsertOneAsync(new DataLog { CorrelationId = correlationId, Message = message, RoutingKey = routingKey, Exchange = exchange, Date = DateTime.Now, ServiceEndPoint = serviceUrl });
         }
 
         public string GetAllLogs()
@@ -297,42 +297,74 @@ namespace Accenture.DataSaver.DataAccess
 
             var collection = database.GetCollection<DataLog>("training_logs");
 
-            var findOptions = new FindOptions<DataLog>()
+            var findOptions = new FindOptions<DataLog, BsonDocument>()
             {
                 Limit = 200,
                 Sort = Builders<DataLog>.Sort.Descending(x => x.Date)
             };
 
-            findOptions.Projection = "{'_id': 0}";
+            findOptions.Projection = "{'_id': 0, 'CorrelationId':0}";
+            var findFluent = collection.FindSync<BsonDocument>(FilterDefinition<DataLog>.Empty, findOptions).ToList();
+            findFluent.ForEach(x => { x["Date"] = Convert.ToDateTime(x["Date"]).ToString("MM-dd-yyyy"); });
+            return findFluent.ToJson();
+        }
 
-            var objects = collection.FindSync(filter: new BsonDocument(), options: findOptions).ToList();
+        public string RecordNewOperation(string dataObj)
+        {
+            var client = new MongoClient(_connectionString);
+            var database = client.GetDatabase(DatabaseName);
 
-            var test = objects.GroupBy(x => x.Date.Date)
-                .Select(y => new { Date = y.Key.ToShortDateString(), Count = y.Count(), Records = y.GroupBy(z => z.CorrelationId).Select(z => new { CorrelationId = z.Key, Count = z.Count(), Messages = z.ToList() }) });
-
-            JObject rootData = new JObject();
-
-            foreach(var dataLevel in objects.GroupBy(x => x.Date.ToString("MM/dd/yyyy")))
+            if(!database.ListCollectionNames().ToList().Any(x => x == "virtual_services"))
             {
-                var requests = dataLevel.ToList().GroupBy(x => x.CorrelationId);
-                var childRootData = new JObject();
-
-                foreach(var req in requests)
-                {
-                    var messageRoot = new JObject();
-                    foreach(var mroot in req.ToList())
-                    {
-                        messageRoot.Add(new JProperty(mroot.RoutingKey, new JObject(new JProperty("Exchange", mroot.Exchange), new JProperty("Message", JObject.Parse(mroot.Message)), new JProperty("Date", mroot.Date))));
-                    }
-
-                    childRootData.Add(new JProperty(req.Key, messageRoot));
-                }
-
-                rootData.Add(new JProperty(dataLevel.Key, childRootData));
+                database.CreateCollection("virtual_services");
             }
 
-            return rootData.ToString();
+            var collection = database.GetCollection<RecordData>("virtual_services");
+            CreateIndexAsync("virtual_services", "VirtualResource");
+            var serviceEndpoint = BsonSerializer.Deserialize<RecordData>(dataObj).ServiceEndpoint;
+            var uniqueId = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+            var baseUri = new Uri(serviceEndpoint);
+            collection.InsertOne(new RecordData { ServiceEndpoint = serviceEndpoint, VirtualEndpoint = "record/"+ uniqueId + baseUri.AbsolutePath, UniqueKey = uniqueId, Status = "Active", Edit = true });
 
+            return new JObject(new JProperty("result","Success")).ToString();
+
+        }
+
+        public string RecordExistingOperation(string dataObj)
+        {
+            var client = new MongoClient(_connectionString);
+            var database = client.GetDatabase(DatabaseName);
+
+            if(!database.ListCollectionNames().ToList().Any(x => x == "virtual_services"))
+            {
+                return new JObject(new JProperty("result","Failure")).ToString();
+            }
+
+            var collection = database.GetCollection<RecordData>("virtual_services");
+            var data = BsonSerializer.Deserialize<RecordData>(dataObj);
+            var filter = Builders<RecordData>.Filter.Eq("VirtualEndpoint", data.VirtualEndpoint);
+            var update = Builders<RecordData>.Update.Set("Status", data.Status).Set("Edit", data.Edit);
+            var response = collection.UpdateOne(filter, update);
+            return new JObject(new JProperty("result","Success")).ToString();
+
+        }
+
+        public string GetAllRecordLearningOperations()
+        {
+            var client = new MongoClient(_connectionString);
+            var database = client.GetDatabase(DatabaseName);
+            if(!database.ListCollectionNames().ToList().Any(x => x == "virtual_services"))
+            {
+                return new JObject(new JProperty("result","Failure")).ToString();
+            }
+            var collection = database.GetCollection<RecordData>("virtual_services");
+            var findOptions = new FindOptions<RecordData, RecordDataModel>
+            {
+                ShowRecordId = false,
+                Projection = Builders<RecordData>.Projection.Exclude(f => f.UniqueKey).Exclude("_id"),                
+            };
+            var findFluent = collection.FindSync<RecordDataModel>(FilterDefinition<RecordData>.Empty, findOptions).ToList();
+            return findFluent.ToJson();
         }
     }
 }
